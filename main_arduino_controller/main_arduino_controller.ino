@@ -60,8 +60,10 @@ void loop() {
 void lightCycle() {
   digitalWrite(growthLight, HIGH);
   isDay = true;
+  targetTemp = 65;
   delay(5.76E7);    // 16 hours of light
   digitalWrite(growthLight, LOW);
+  targetTemp = 55;
   isDay = false;
   delay(7.2E6);     // 2 hours of dark
 }
@@ -86,12 +88,12 @@ void tempControlLoop() {
   if (tempValue >= targetTemp - 5 && tempValue <= targetTemp + 5) {
     digitalWrite(coolerPin, LOW);    // default, cooler should be off
     digitalWrite(ceramicHeater, LOW);  // default heater should be off
-  } else {
-    if (tempValue <= targetTemp - 5) // min temp
+  } else { //Will heat up to the targetTemp regardless of 5 deg threshold
+    if (tempValue < targetTemp) // min temp
     {
       pinMode(ceramicHeater, HIGH);   // turn on heater
     }
-    else if (tempValue >= targetTemp + 5) // max temp
+    else if (tempValue > targetTemp) // max temp
     {
       pinMode(coolerPin, HIGH);   // turn on cooler
     }
