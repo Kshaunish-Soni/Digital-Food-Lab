@@ -19,9 +19,10 @@ int moveTo6();
 
 void setup() {
   pinMode(sensorPin, INPUT);
-  myStepperx.setSpeed(60);
-  mySteppery.setSpeed(60);
-  myStepperz.setSpeed(60);
+  myStepperx.setSpeed(200);
+  mySteppery.setSpeed(200);
+  myStepperz.setSpeed(100);
+  mySteppergrab.setSpeed(60);
   Serial.begin(9600);
 }
 
@@ -61,15 +62,18 @@ void moveTo0(); {
   Serial.println("clockwise");
     myStepperx.step(12.5*STEPS);
     mySteppery.step(72.5*STEPS);
-    myStepperz.step(15*STEPS);
+    delay(100);
     mySteppergrab.step(0.25*STEPS);
+    myStepperz.step(15*STEPS);
     delay(200);
-
+    digitalWrite(motorPin, HIGH);
+    mySteppergrab.step(-0.25*STEPS);
+    
     Serial.println("counterclockwise");
+    myStepperz.step(previous-15*STEPS);
+    delay(100);
     myStepperx.step(previous-12.5*STEPS);
     mySteppery.step(previous-72.5*STEPS);
-    myStepperz.step(previous-15*STEPS);
-    mySteppergrab.step(-0.25*STEPS);
     delay(10000);
 
     
@@ -79,15 +83,19 @@ void moveTo1(); {
   Serial.println("clockwise");
     myStepperx.step(12.5*STEPS);
     mySteppery.step(52.5*STEPS);
-    myStepperz.step(15*STEPS);
+    delay(100);
     mySteppergrab.step(0.25*STEPS);
-    delay(200);
+    myStepperz.step(15*STEPS);
+    delay(200);]
+    digitalWrite(motorPin, HIGH);
+    mySteppergrab.step(-0.25*STEPS);
+    digitalWrite(motorPin, LOW);
 
     Serial.println("counterclockwise");
     myStepperz.step(previous-15*STEPS);
+    delay(100);
     myStepperx.step(previous-12.5*STEPS);
     mySteppery.step(previous-52.5*STEPS);
-    mySteppergrab.step(-0.25*STEPS);
     delay(10000);
 }
 
@@ -98,6 +106,9 @@ void moveTo2(); {
     myStepperz.step(15*STEPS);
     mySteppergrab.step(0.25*STEPS);
     delay(200);
+    digitalWrite(motorPin, HIGH);
+    mySteppergrab.step(-0.25*STEPS);
+    digitalWrite(motorPin, LOW);
 
     Serial.println("counterclockwise");
     myStepperz.step(previous-15*STEPS);
@@ -114,6 +125,9 @@ void moveTo3(); {
     myStepperz.step(15*STEPS);
     mySteppergrab.step(0.25*STEPS);
     delay(200);
+    digitalWrite(motorPin, HIGH);
+    mySteppergrab.step(-0.25*STEPS);
+    digitalWrite(motorPin, LOW);
 
     Serial.println("counterclockwise");
     myStepperz.step(previous-15*STEPS);
@@ -130,6 +144,9 @@ void moveTo4(); {
     myStepperz.step(15*STEPS);
     mySteppergrab.step(0.25*STEPS);
     delay(200);
+    digitalWrite(motorPin, HIGH);
+    mySteppergrab.step(-0.25*STEPS);
+    digitalWrite(motorPin, LOW);
 
     Serial.println("counterclockwise");
     myStepperz.step(previous-15*STEPS);
@@ -146,7 +163,10 @@ void moveTo5(); {
     myStepperz.step(15*STEPS);
     mySteppergrab.step(0.25*STEPS);
     delay(200);
-
+    digitalWrite(motorPin, HIGH);
+    mySteppergrab.step(-0.25*STEPS);
+    digitalWrite(motorPin, LOW);
+    
     Serial.println("counterclockwise");
     myStepperz.step(previous-15*STEPS);
     myStepperx.step(previous-72.5*STEPS);
@@ -162,6 +182,9 @@ void moveTo6(); {
     myStepperz.step(15*STEPS);
     mySteppergrab.step(0.25*STEPS);
     delay(200);
+    digitalWrite(motorPin, HIGH);
+    mySteppergrab.step(-0.25*STEPS);
+    digitalWrite(motorPin, LOW);
 
     Serial.println("counterclockwise");
     myStepperx.step(previous-92.5*STEPS);
@@ -174,5 +197,3 @@ void moveTo6(); {
 }
 
   
-
-
