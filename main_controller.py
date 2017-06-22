@@ -1,4 +1,6 @@
-import serial
+#import serial
+from datetime import datetime
 
-arduinoSerial = serial.Serial('/dev/ttyACM0',9600)
+dateArray = {datetime.now().month, datetime.now().day, datetime.now().year, datetime.now().hour};
+print()
 
