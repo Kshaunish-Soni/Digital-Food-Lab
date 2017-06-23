@@ -8,6 +8,7 @@ data_matrix = [[], #Time
                [], #Temp 2
                [], #Humidity
                [], #Water Depth
+               [], #pH
                ]
 
 try: #will try to add data to the output file
@@ -31,3 +32,4 @@ finally:
         text_file = open("Output.txt", "w")
         text_file.write(",".join(str(e) for e in temp))
         text_file.close()
+        print(data_matrix)
