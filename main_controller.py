@@ -26,10 +26,11 @@ finally:
         arduinoData = cereal_data.readline()
         splitData = arduinoData.spit(",")
         #    Write code for GETTING ARRAY DATA
+        text_file = open("Output.txt", "w")
         data_matrix[0].append(datetime.month*100+datetime.day)
+        text_file.write(",".join(str(e) for e in data_matrix[0]))
         for row in range(len(data_matrix)-1):
             data_matrix[row+1].append(int(splitData[row]));
-        text_file = open("Output.txt", "w")
-        text_file.write(",".join(str(e) for e in temp))
+            text_file.write(",".join(str(e) for e in data_matrix[row]))
         text_file.close()
         print(data_matrix)
