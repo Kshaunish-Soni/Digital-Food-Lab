@@ -64,7 +64,8 @@ void setup() {
   Scheduler.startLoop(tempControlLoop);
   Scheduler.startLoop(humidityCheck);
 }
-// Debug Loop
+
+// Main Debug Loop
 void loop() {
   Serial.print("Virtual Time: "); Serial.print(hour());Serial.print(":");Serial.print(minute());Serial.print("\t");Serial.print(month());Serial.print("/");Serial.println(day());
   Serial.print("Main Temperature (C): ");  Serial.println(getMainTemp());
