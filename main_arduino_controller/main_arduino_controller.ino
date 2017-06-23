@@ -37,6 +37,11 @@ float targetTemp = 65; // 65 deg F morning 55 deg F night
 const int humidifier = 0; // digital pin humidifer is hooked up to
 AM2315 am2315;
 
+//Hydroponics & Pump Digital Pins
+const int waterDepthSensor = 0;
+const int waterPump = 0;
+const int nutrientPump = 0;
+
 void setup() {
   Serial.begin(9600);
   setTime(0, 0, 0, sDay, sMonth, sYear);
@@ -58,11 +63,17 @@ void setup() {
     while (1);
   }
 
+  // Water and Nutrient Pump
+  pinMode(waterDepthSensor, INPUT);
+  pinMode(waterPump, OUTPUT);
+  pinMode(nutrientPump, OUTPUT);
+  
   // Allows us to run different loops simultaneously -- COMMENT OUT ONES YOU AREN'T GONNA TEST!
   Scheduler.startLoop(lightCycle);
   Scheduler.startLoop(timeLoop);
   Scheduler.startLoop(tempControlLoop);
   Scheduler.startLoop(humidityCheck);
+  Scheduler.startLoop(hydroponicsLoop);
 }
 
 // Main Debug Loop
@@ -131,6 +142,19 @@ void humidityCheck() {
   delay(30000);   // check every 30 seconds
 }
 
+void hydroponicsLoop() {
+  int level = 2;
+  int waterDepth = getWaterDepth();
+  if(waterDepth>level-0){
+    digitalWrite(waterPump, LOW);
+    digitalWrite(nutrientPump, LOW);
+  } else {
+    digitalWrite(waterPump, HIGH);
+    digitalWrite(nutrientPump, HIGH);
+  }
+  delay(2000);
+}
+
 //Instance Methods -- For convenience
 float getMainTemp() { // For main temperature sensor
   int v = 5.0; // Voltage which arduino provides
@@ -145,5 +169,9 @@ float getTemp2(){
 
 float getBoxHumidity(){
   return am2315.getHumidity();
+}
+
+float getWaterDepth(){
+  return analogRead(waterDepthSensor);
 }
 
