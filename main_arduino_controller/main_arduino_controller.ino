@@ -1,7 +1,9 @@
-#include <Scheduler.h>
-
 #include <Time.h>
 #include <TimeLib.h>
+#include <Wire.h>
+//Comment out #include <util/delay>
+#include <cactus_io_AM2315.h> //Download zip from: http://cactus.io/hookups/sensors/temperature-humidity/am2315/hookup-arduino-to-am2315-temp-humidity-sensor
+#include <Scheduler.h>
 
 
 //Start Time -- needed for the light system and harvesting
@@ -31,7 +33,9 @@ const int growthLight = 0;
 const int tempPin = 0;   // 0 = digital pin number temp sensor is hooked up to
 const int coolerPin = 1;    // 1# = digital pin number cooler is hooked up to
 const int ceramicHeater = 2; // 2# = digital pin number heater is hooked up to
-int targetTemp = 65; // 65 deg F morning 55 deg F night
+float targetTemp = 65; // 65 deg F morning 55 deg F night
+
+//Humidity and Temp Sensor Instance
 
 void setup() {
   Serial.begin(9600);
@@ -101,7 +105,10 @@ void tempControlLoop() {
 }
 
 //Instance Methods -- For convenience
-int getTemp() {
-  return analogRead(tempPin);
+float getTemp() {
+  int v = 5.0; // Voltage which arduino provides
+  int reading = analogRead(tempPin);
+  float voltage = reading * v / 1024.0;
+  return (voltage - 0.5) * 100;
 }
 
