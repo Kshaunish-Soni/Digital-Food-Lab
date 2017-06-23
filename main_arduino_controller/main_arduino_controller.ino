@@ -18,8 +18,6 @@ int curHr = 0;
 int curMin = 0;
 int curSec = 0;
 
-
-
 //Target Time -- How much time has elapsed in light cycle
 int timeElapsed = 0;
 
@@ -35,7 +33,9 @@ const int coolerPin = 1;    // 1# = digital pin number cooler is hooked up to
 const int ceramicHeater = 2; // 2# = digital pin number heater is hooked up to
 float targetTemp = 65; // 65 deg F morning 55 deg F night
 
-//Humidity and Temp Sensor Instance
+// Humidity Control
+const int humidifier = 0; // digital pin humidifer is hooked up to
+AM2315 am2315;
 
 void setup() {
   Serial.begin(9600);
@@ -49,18 +49,31 @@ void setup() {
   pinMode(coolerPin, OUTPUT);
   pinMode(ceramicHeater, OUTPUT);
 
-  //Allows us to run different loops simultaneously -- COMMENT OUT ONES YOU AREN'T GONNA TEST!
+  // Humidifier Setup
+  pinMode(humidifier, OUTPUT);
+  digitalWrite(humidifier, LOW); // default, humidifier is off
+  // Initialize the Adafruit Humidity and Temp Sensor
+  if (!am2315.begin()) {
+    Serial.println("am2315 not found. Wiring? Connection?");
+    while (1);
+  }
+
+  // Allows us to run different loops simultaneously -- COMMENT OUT ONES YOU AREN'T GONNA TEST!
   Scheduler.startLoop(lightCycle);
   Scheduler.startLoop(timeLoop);
   Scheduler.startLoop(tempControlLoop);
+  Scheduler.startLoop(humidityCheck);
 }
-
+// Debug Loop
 void loop() {
-
-
+  Serial.print("Virtual Time: "); Serial.print(hour());Serial.print(":");Serial.print(minute());Serial.print("\t");Serial.print(month());Serial.print("/");Serial.println(day());
+  Serial.print("Main Temperature (C): ");  Serial.println(getMainTemp());
+  Serial.print("am2315 Dual Sensor, Humidity: "); Serial.println(am2315.getHumidity());
+  Serial.print("am2315 Dual Sensor, Temperature in C: "); Serial.println(am2315.getTemperature_C());
+  delay(5000);
 }
 
-//LIGHT FUNCTIONS. Author: Anya Li
+// LIGHT FUNCTIONS. Author: Anya Li. Editted By: Stone
 void lightCycle() {
   digitalWrite(growthLight, HIGH);
   isDay = true;
@@ -82,11 +95,9 @@ void timeLoop() {
   delay(30000); //30sec delay
 }
 
-// Controls the temperature. Author: Anya Li; Edit: Stone
+// Controls the temperature. Author: Anya Li; Editted By: Stone
 void tempControlLoop() {
-  int tempValue = getTemp();
-  Serial.print("tempValue: ");
-  Serial.println(tempValue);
+  int tempValue = getMainTemp();
 
   //Cooler and Heater are Digital (On or Off)
   if (tempValue >= targetTemp - 5 && tempValue <= targetTemp + 5) {
@@ -95,20 +106,43 @@ void tempControlLoop() {
   } else { //Will heat up to the targetTemp regardless of 5 deg threshold
     if (tempValue < targetTemp) // min temp
     {
-      pinMode(ceramicHeater, HIGH);   // turn on heater
+      digitalWrite(ceramicHeater, HIGH);   // turn on heater
     }
     else if (tempValue > targetTemp) // max temp
     {
-      pinMode(coolerPin, HIGH);   // turn on cooler
+      digitalWrite(coolerPin, HIGH);   // turn on cooler
     }
   }
 }
 
+// Controls humidity of Farm. Author: Anya Li. Editted by: Stone Mao
+void humidityCheck() {
+  int humidityValue = am2315.getHumidity();
+  if (humidityValue < 65.00){
+    digitalWrite(humidifier, HIGH);  // turn humidifier on if humidity is below 65%
+  }
+  
+  else if (humidityValue >= 67.00)
+  {
+    digitalWrite(humidifier, LOW);  // turn humidifier off if humidity is greater or equal to 67%
+  }
+  
+  delay(30000);   // check every 30 seconds
+}
+
 //Instance Methods -- For convenience
-float getTemp() {
+float getMainTemp() { // For main temperature sensor
   int v = 5.0; // Voltage which arduino provides
   int reading = analogRead(tempPin);
   float voltage = reading * v / 1024.0;
   return (voltage - 0.5) * 100;
+}
+
+float getTemp2(){
+  return am2315.getTemperature_C();
+}
+
+float getBoxHumidity(){
+  return am2315.getHumidity();
 }
 
