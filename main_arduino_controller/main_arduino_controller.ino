@@ -5,9 +5,6 @@
 #include <cactus_io_AM2315.h> //Download zip from: http://cactus.io/hookups/sensors/temperature-humidity/am2315/hookup-arduino-to-am2315-temp-humidity-sensor
 #include <Scheduler.h>
 
-//data array
-float data[] = {getMainTemp(), getTemp2(),getBoxHumidity(), getWaterDepth()};
-
 //Start Time -- needed for the light system and harvesting
 int sDay = 1;
 int sMonth = 1;
@@ -84,7 +81,9 @@ void loop() {
   Serial.print("Main Temperature (C): ");  Serial.println(getMainTemp());
   Serial.print("am2315 Dual Sensor, Humidity: "); Serial.println(am2315.getHumidity());
   Serial.print("am2315 Dual Sensor, Temperature in C: "); Serial.println(am2315.getTemperature_C());
-  Serial.print(data);
+
+  //data array
+  Serial.print(getMainTemp());Serial.print(",");Serial.print(getTemp2());Serial.print(",");Serial.print(getBoxHumidity());Serial.print(",");Serial.print(getWaterDepth());
   delay(5000);
 }
 
