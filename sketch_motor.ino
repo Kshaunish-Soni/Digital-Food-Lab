@@ -1,10 +1,9 @@
 int sensorPin = 13;
-int motorPin = 2;
+int motorPin = 2;     //where the bushing motor will go. Change this for any other pin if need be.
 #include <Stepper.h>
 int previous = 0;
-int timerdelay;
 const int STEPS = 200; //change this to fit the numbers
-const int Location1x = 2.5*5;   // variables for the x and y locations of the plants.
+const int Location1x = 2.5*5;   // variables for the x and y locations of the plants. Change this to fit the locations.
 const int Location2x = 6.5*5;
 const int Location3x = 10.5*5;
 const int Location4x = 14.5*5;
@@ -106,9 +105,9 @@ void moveTo0(); {
     
 }
 
-void moveTo1(); {
-  Serial.println("clockwise");
-    myStepperx.step(Location1x*STEPS);
+void moveTo1(); {                         // same thing done 10 times, one function for each location.
+  Serial.println("clockwise");            // Location variables are interchangeable depending on the location
+    myStepperx.step(Location1x*STEPS);    // of the plant. Calibration may be needed based on design.
     mySteppery.step(Location4y*STEPS);
     delay(100);
     mySteppergrab.step(0.1*STEPS);
