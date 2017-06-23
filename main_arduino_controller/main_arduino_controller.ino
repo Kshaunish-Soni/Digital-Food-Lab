@@ -24,22 +24,22 @@ int timeElapsed = 0;
 boolean isDay = true;
 
 //Light Pin #'s
-const int growthLight = 0;
+const int growthLight = 3;
 
 //Temperature Control Pin #'s
 const int tempPin = 0;   // 0 = digital pin number temp sensor is hooked up to
-const int coolerPin = 1;    // 1# = digital pin number cooler is hooked up to
-const int ceramicHeater = 2; // 2# = digital pin number heater is hooked up to
+const int coolerPin = 4;    // 1# = digital pin number cooler is hooked up to
+const int ceramicHeater = 5; // 2# = digital pin number heater is hooked up to
 float targetTemp = 65; // 65 deg F morning 55 deg F night
 
 // Humidity Control
-const int humidifier = 0; // digital pin humidifer is hooked up to
+const int humidifier = 6; // digital pin humidifer is hooked up to
 AM2315 am2315;
 
 //Hydroponics & Pump Digital Pins
 const int waterDepthSensor = 0;
 const int waterPump = 0;
-const int nutrientPump = 0;
+const int nutrientPump = 7;
 
 void setup() {
   Serial.begin(9600);
