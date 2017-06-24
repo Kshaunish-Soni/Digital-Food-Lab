@@ -1,4 +1,5 @@
 import serial
+import time
 from datetime import datetime
 
 first_contact = False
@@ -46,26 +47,30 @@ finally:
             cereal_data.write(getTimeDecimal())
     else:
         while True:
-            serial_data_Array.append(inByte) #will store each byte into array
-            serial_count+=1 #Increment #
-            if(serial_count>4): #If there is five data bytes received
-                text_file = open("Output.txt", "w") #Opens data file
+            if(cereal_data.in_waiting > 0):
+                serial_data_Array.append(inByte) #will store each byte into array
+                serial_count+=1 #Increment #
+                if(serial_count>4): #If there is five data bytes received
+                    text_file = open("Output.txt", "w") #Opens data file
 
-                #Add current daytime to data matrix MonthMonthDayDay.HrHrMinMin
-                data_matrix[0].append(getTimeDecimal())
+                    #Add current daytime to data matrix MonthMonthDayDay.HrHrMinMin
+                    data_matrix[0].append(getTimeDecimal())
 
-                #Join current data into one string and save in file
-                text_file.write(",".join(str(e) for e in data_matrix[0]))
+                    #Join current data into one string and save in file
+                    text_file.write(",".join(str(e) for e in data_matrix[0]))
 
-                for row in range(len(data_matrix)-1): #doing row - 1 because date row has already been done
-                    data_matrix[row+1].append(int(serial_data_Array[row])) #adds in new data in row
-                    text_file.write(",".join(str(e) for e in data_matrix[row+1])) #adds it into the textfile
+                    for row in range(len(data_matrix)-1): #doing row - 1 because date row has already been done
+                        data_matrix[row+1].append(int(serial_data_Array[row])) #adds in new data in row
+                        text_file.write(",".join(str(e) for e in data_matrix[row+1])) #adds it into the textfile
 
-                day = serial_data_Array[len(serial_data_Array)-1]
-                text_file.write(day) #Write the number of days
+                    day = serial_data_Array[len(serial_data_Array)-1]
+                    text_file.write(day) #Write the number of days
 
-                text_file.close()
-                print(data_matrix)
+                    text_file.close()
+                    print(data_matrix)
 
-                serial_count = 0 #Resets to get data
-                serial_data_Array = []
+                    serial_count = 0 #Resets to get data
+                    serial_data_Array = []
+
+            cereal_data.write(day) # Will stimulate handshake
+            time.sleep(1);

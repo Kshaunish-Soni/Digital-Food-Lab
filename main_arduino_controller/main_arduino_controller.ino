@@ -1,8 +1,6 @@
 #include <Time.h>
 #include <TimeLib.h>
 #include <Wire.h>
-//Comment out #include <util/delay>
-#include <cactus_io_AM2315.h> //Download zip from: http://cactus.io/hookups/sensors/temperature-humidity/am2315/hookup-arduino-to-am2315-temp-humidity-sensor
 #include <Scheduler.h>
 
 //Start Time -- needed for the light system and harvesting
@@ -26,7 +24,6 @@ float targetTemp = 65; // 65 deg F morning 55 deg F night
 
 // Humidity Control
 const int humidifier = 6; // digital pin humidifer is hooked up to
-AM2315 am2315;
 
 //Hydroponics & Pump Digital Pins
 const int waterDepthSensor = 0;
@@ -68,11 +65,6 @@ void setup() {
   // Humidifier Setup
   pinMode(humidifier, OUTPUT);
   digitalWrite(humidifier, LOW); // default, humidifier is off
-  // Initialize the Adafruit Humidity and Temp Sensor
-  if (!am2315.begin()) {
-    Serial.println("am2315 not found. Wiring? Connection?");
-    while (1);
-  }
 
   // Water and Nutrient Pump
   pinMode(waterDepthSensor, INPUT);
@@ -90,6 +82,7 @@ void setup() {
 // Main Debug Loop
 void loop() {
   if (Serial.available() > 0) {
+    dayElapsed = Serial.read();
     Serial.write(getMainTemp());
     Serial.write(getTemp2());
     Serial.write(getBoxHumidity());
@@ -147,7 +140,7 @@ void tempControlLoop() {
 
 // Controls humidity of Farm. Author: Anya Li. Editted by: Stone Mao
 void humidityCheck() {
-  int humidityValue = am2315.getHumidity();
+  int humidityValue = getBoxHumidity();
   if (humidityValue < 65.00) {
     digitalWrite(humidifier, HIGH);  // turn humidifier on if humidity is below 65%
   }
@@ -190,11 +183,11 @@ float getMainTemp() { // For main temperature sensor
 }
 
 float getTemp2() {
-  return am2315.getTemperature_C();
+  return 0;
 }
 
 float getBoxHumidity() {
-  return am2315.getHumidity();
+  return 0;
 }
 
 float getWaterDepth() {
