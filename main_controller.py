@@ -28,15 +28,14 @@ try: #will try to add data to the output file
     text_file = open("Output.txt", "r")
 
     for row in range(0,5):
-        text_split = text_file.readline(row).split(",")
+        text_split = text_file.readline().split(",")
         for num in text_split:
-            print(text_split)
             data_matrix[row].append(int(num))
-
-        print(data_matrix[line])
-        
+            
     day = text_file.readline(6)
+    
     print("Finish reading file")
+    
 except IOError:
     print("Output file not found, created one")
     text_file = open("Output.txt", "w")
