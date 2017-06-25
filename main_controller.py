@@ -5,7 +5,13 @@ from datetime import datetime
 first_contact = False
 serial_data_Array = []
 serial_count = 0
-cereal_data = serial.Serial('/dev/ttyACM0',9600) #Connect to Arduino via USB on Serial 9600
+cereal_data = serial.Serial("/dev/ttyACM0",9600, timeout=1) #Connect to Arduino via USB on Serial 9600
+cereal_data.bytesize=serial.EIGHTBITS
+cereal_data.parity=serial.PARITY_NONE
+cereal_data.stopbits=serial.STOPBITS_ONE
+cereal_data.xonxoff=False
+cereal_data.rtscts=False
+cereal_data.dsrdtr=False
 day = 0
 
 data_matrix = [[], #Time
@@ -16,13 +22,13 @@ data_matrix = [[], #Time
                ]
 def getTimeDecimal():
     cur_time = datetime.now()
-    return cur_time.month*100+cur_time.day+cur_time.hour/100+cur_time.minute/10000
+    return cur_time.month*1000000+cur_time.day*10000+cur_time.hour*100+cur_time.minute
 
 try: #will try to add data to the output file
     row = 0
     text_file = open("Output.txt", "r")
 
-    for line in range(1,5):
+    for line in range(1,6):
         text_split = text_file.readline(line).split(",")
         for num in text_split:
             data_matrix[line].append(int(num))
@@ -30,21 +36,27 @@ try: #will try to add data to the output file
         print(data_matrix[line])
         row += 1
     day = text_file.readline(6)
-
-except FileNotFoundError:
+    print("Finish reading file")
+except IOError:
     print("Output file not found, created one")
-    text_file = open("Output.txt", "w")
-    text_file.close()
+    #text_file = open("Output.txt", "w")
+    #text_file.close()
 
 finally:
-    inByte = cereal_data.readline()
+    inByte = cereal_data.read()
     if not first_contact : #If connection isn't estb, estb it
-        if inByte == "A" :
-            first_contact = True
-            cereal_data.flush() #clear serial data
-            cur_time = datetime.now()
-            #writes time back to arduino
-            cereal_data.write(getTimeDecimal())
+        print(inByte);
+        first_contact = True
+        cur_time = getTimeDecimal()
+        #writes time back to arduino
+        datadate = str(cur_time);
+        while(1):
+            cereal_data.write(datadate+"\n"+str(day)+"\n") #Send the date time
+            data = cereal_data.read()
+            if data != "A" and data !=" ":
+                while 1:
+                    cereal_data.write("Hi")
+                    print(cereal_data.readline())
     else:
         while True:
             if(cereal_data.in_waiting > 0):
