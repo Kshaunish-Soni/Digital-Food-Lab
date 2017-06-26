@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <Scheduler.h>
 
+boolean once = false;
 //Start Time -- needed for the light system and harvesting
 int dayElapsed = 0;
 int sYear = 2017;
@@ -41,18 +42,7 @@ void setup() {
   //Establish contact with Raspberry Pi
   establishContact();
   //Get time from Raspberry pi
-  if (Serial.available() > 0) {
-    int read1 = Serial.read();
-    int read2 = Serial.read();
-    int timeArray[4];
-    float myData = read1 * 10000;
-    for (int i = 0; i < 4; i++) {
-      timeArray[3 - i] = ((int)myData) % 100;
-      myData /= 100;
-    }
-    dayElapsed = read2;
-    setTime(timeArray[2], timeArray[3], 0, timeArray[1], timeArray[0], sYear);
-  }
+
 
   // Light Setup
   pinMode(growthLight, OUTPUT);
@@ -65,6 +55,7 @@ void setup() {
   // Humidifier Setup
   pinMode(humidifier, OUTPUT);
   digitalWrite(humidifier, LOW); // default, humidifier is off
+  // Initialize the Adafruit Humidity and Temp Sensor
 
   // Water and Nutrient Pump
   pinMode(waterDepthSensor, INPUT);
@@ -73,33 +64,55 @@ void setup() {
 
   // Allows us to run different loops simultaneously -- COMMENT OUT ONES YOU AREN'T GONNA TEST!
   Scheduler.startLoop(lightCycle);
-  Scheduler.startLoop(timeLoop);
   Scheduler.startLoop(tempControlLoop);
-  Scheduler.startLoop(humidityCheck);
-  Scheduler.startLoop(hydroponicsLoop);
 }
 
 // Main Debug Loop
 void loop() {
+  Serial.flush();
   if (Serial.available() > 0) {
-    dayElapsed = Serial.read();
-    Serial.write(getMainTemp());
-    Serial.write(getTemp2());
-    Serial.write(getBoxHumidity());
-    Serial.write(getWaterDepth());
-    Serial.write(dayElapsed);
+    //Serial.print("Hour: ");Serial.println(hour());
+    if (!once) {
+        int read1 = Serial.parseInt();
+        Serial.flush();
+        int read2 = Serial.parseInt();
+        Serial.print("Date time: "); Serial.println(read1);
+        Serial.print("Day Elapsed: "); Serial.println(read2);
+        int timeArray[4];
+        float myData = read1;
+        for (int i = 0; i < 4; i++) {
+          timeArray[3 - i] = ((int)myData) % 100;
+          myData /= 100;
+        }
+        dayElapsed = read2;
+        setTime(timeArray[2], timeArray[3], 0, timeArray[1], timeArray[0], sYear);
+        once=true;
+    }
+    
+    Serial.print(getMainTemp());
+    Serial.print(getTemp2());
+    Serial.print(getBoxHumidity());
+    Serial.print(getWaterDepth());
+    Serial.print(dayElapsed);
+    dayElapsed = Serial.parseInt();
+    //Serial.print("Day Received: ");Serial.println(dayElapsed);
+  } else {
+    //Serial.println("No serial data");
   }
-  delay(15000);
+  Serial.flush();
+  delay(1000);
 }
 
 // LIGHT FUNCTIONS. Author: Anya Li. Editted By: Stone
 void lightCycle() {
   /*
-   * After seed germinates (around 6 days), lights will turn on and follow cycle
-   * WILL ADD SALENIS DATA ON
+     After seed germinates (around 6 days), lights will turn on and follow cycle
+     WILL ADD SALENIS DATA ON
   */
+  //Serial.print("Day: ");Serial.println(dayElapsed);
   if (dayElapsed > 6) {
     digitalWrite(growthLight, HIGH);
+    //Serial.println("Grow Light ON!");
     isDay = true;
     targetTemp = 65;
     delay(5.76E7);    // 16 hours of light
@@ -109,6 +122,7 @@ void lightCycle() {
     delay(7.2E6);     // 2 hours of dark
   } else {
     digitalWrite(growthLight, LOW);
+    delay(2000);
   }
 }
 
@@ -120,6 +134,7 @@ void timeLoop() {
 
 // Controls the temperature. Author: Anya Li; Editted By: Stone
 void tempControlLoop() {
+  //Serial.println("Hello from tempControl");
   int tempValue = getMainTemp();
 
   //Cooler and Heater are Digital (On or Off)
@@ -136,6 +151,7 @@ void tempControlLoop() {
       digitalWrite(coolerPin, HIGH);   // turn on cooler
     }
   }
+  delay(3000);
 }
 
 // Controls humidity of Farm. Author: Anya Li. Editted by: Stone Mao
@@ -170,7 +186,7 @@ void hydroponicsLoop() {
 void establishContact() {
   while (Serial.available() <= 0) { // If not established
     Serial.print("A"); // Will send A
-    delay(300);
+    delay(200);
   }
 }
 
@@ -179,18 +195,18 @@ float getMainTemp() { // For main temperature sensor
   int v = 5.0; // Voltage which arduino provides
   int reading = analogRead(tempPin);
   float voltage = reading * v / 1024.0;
-  return (voltage - 0.5) * 100;
+  return 56;
 }
 
 float getTemp2() {
-  return 0;
+  return 67;
 }
 
 float getBoxHumidity() {
-  return 0;
+  return 78;
 }
 
 float getWaterDepth() {
-  return analogRead(waterDepthSensor);
+  //return analogRead(waterDepthSensor);
+  return 90;
 }
-
