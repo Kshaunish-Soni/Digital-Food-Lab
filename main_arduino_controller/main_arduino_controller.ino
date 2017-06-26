@@ -1,3 +1,6 @@
+
+#define dataPin A3 // Analog Pin sensor is connected to
+
 #include <Time.h>
 #include <TimeLib.h>
 #include <Wire.h>
@@ -18,7 +21,6 @@ boolean isDay = true;
 const int growthLight = 3;
 
 //Temperature Control Pin #'s
-const int tempPin = 0;   // 0 = digital pin number temp sensor is hooked up to
 const int coolerPin = 4;    // 1# = digital pin number cooler is hooked up to
 const int ceramicHeater = 5; // 2# = digital pin number heater is hooked up to
 float targetTemp = 65; // 65 deg F morning 55 deg F night
@@ -27,12 +29,13 @@ float targetTemp = 65; // 65 deg F morning 55 deg F night
 const int humidifier = 6; // digital pin humidifer is hooked up to
 
 //Hydroponics & Pump Digital Pins
-const int waterDepthSensor = 0;
+const int waterDepthSensor = A0;
 const int waterPump = 0;
 const int nutrientPump = 7;
 
 //Serial Data
 int serialCount = 0;
+
 
 void setup() {
   Serial.begin(9600);
@@ -48,7 +51,6 @@ void setup() {
   pinMode(growthLight, OUTPUT);
 
   // Temperature Control Setup
-  pinMode(tempPin, INPUT);
   pinMode(coolerPin, OUTPUT);
   pinMode(ceramicHeater, OUTPUT);
 
@@ -71,7 +73,6 @@ void setup() {
 void loop() {
   Serial.flush();
   if (Serial.available() > 0) {
-    //Serial.print("Hour: ");Serial.println(hour());
     if (!once) {
         int read1 = Serial.parseInt();
         Serial.flush();
@@ -95,9 +96,6 @@ void loop() {
     Serial.print(getWaterDepth());
     Serial.print(dayElapsed);
     dayElapsed = Serial.parseInt();
-    //Serial.print("Day Received: ");Serial.println(dayElapsed);
-  } else {
-    //Serial.println("No serial data");
   }
   Serial.flush();
   delay(1000);
@@ -109,17 +107,17 @@ void lightCycle() {
      After seed germinates (around 6 days), lights will turn on and follow cycle
      WILL ADD SALENIS DATA ON
   */
-  //Serial.print("Day: ");Serial.println(dayElapsed);
-  if (dayElapsed > 6) {
+  Serial.print("Day: ");Serial.println(dayElapsed);
+  if (dayElapsed > 3) {
     digitalWrite(growthLight, HIGH);
     //Serial.println("Grow Light ON!");
     isDay = true;
     targetTemp = 65;
-    delay(5.76E7);    // 16 hours of light
+    delay(7.2e7);    // 16 hours of light
     digitalWrite(growthLight, LOW);
     targetTemp = 55;
     isDay = false;
-    delay(7.2E6);     // 2 hours of dark
+    delay(1.44E7);     // 2 hours of dark
   } else {
     digitalWrite(growthLight, LOW);
     delay(2000);
@@ -191,11 +189,8 @@ void establishContact() {
 }
 
 //Instance Methods -- For convenience
-float getMainTemp() { // For main temperature sensor
-  int v = 5.0; // Voltage which arduino provides
-  int reading = analogRead(tempPin);
-  float voltage = reading * v / 1024.0;
-  return 56;
+float getMainTemp() { // For main temperature sensorz
+  return targetTemp;
 }
 
 float getTemp2() {
@@ -203,10 +198,10 @@ float getTemp2() {
 }
 
 float getBoxHumidity() {
-  return 78;
+  return 65;
 }
 
 float getWaterDepth() {
-  //return analogRead(waterDepthSensor);
-  return 90;
+  int val = analogRead(waterDepthSensor);
+  return abs((val*4.0)/600);
 }
