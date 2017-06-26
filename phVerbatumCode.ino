@@ -1,12 +1,3 @@
-/*
-# This sample codes is for testing the pH meter V1.0.
- # Editor : YouYou
- # Date   : 2013.10.12
- # Ver    : 0.1
- # Product: pH meter
- # SKU    : SEN0161
-*/
-
 #define SensorPin 0          //pH meter Analog output to Arduino Analog Input 0
 unsigned long int avgValue;  //Store the average value of the sensor feedback
 float b;
@@ -50,6 +41,4 @@ void loop()
   digitalWrite(13, LOW); 
 
 }
-
-
 
