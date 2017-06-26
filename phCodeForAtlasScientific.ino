@@ -58,7 +58,7 @@ void loop() {                                         //here we go...
     Serial.println(sensorstring);                     //send that string to the PC's serial monitor
     if (isdigit(sensorstring[0])) {                   //if the first character in the string is a digit
       pH = sensorstring.toFloat();                    //convert the string to a floating point number so it can be evaluated by the Arduino
-      Serial.println(pH);
+      Serial.println(pH);                             //print the pH 
     }
     sensorstring = "";                                //clear the string
     sensor_string_complete = false;                   //reset the flag used to tell if we have received a completed string from the Atlas Scientific product
