@@ -67,6 +67,9 @@ void setup() {
   // Allows us to run different loops simultaneously -- COMMENT OUT ONES YOU AREN'T GONNA TEST!
   Scheduler.startLoop(lightCycle);
   Scheduler.startLoop(tempControlLoop);
+  Scheduler.startLoop(humidityCheck);
+  Scheduler.startLoop(hydroponicsLoop);
+  Scheduler.startLoop(nutrientLoop);
 }
 
 // Main Debug Loop
@@ -178,6 +181,14 @@ void hydroponicsLoop() {
     digitalWrite(nutrientPump, HIGH);
   }
   delay(2000);
+}
+
+void nutrientLoop() {
+  // put your main code here, to run repeatedly:
+  digitalWrite(nutrients, HIGH);
+  delay(12000); // pump nutrients for 12 seconds
+  digitalWrite(nutrients, LOW);
+  delay(5.184E8); // pump nutrients every 6 days
 }
 
 //Serial Connection handshake
