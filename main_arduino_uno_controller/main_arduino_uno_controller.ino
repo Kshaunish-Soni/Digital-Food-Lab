@@ -7,7 +7,7 @@
 boolean once = false;
 unsigned long pM = 0;
 //Start Time -- needed for the light system and harvesting
-int dayElapsed = 0;
+int dayElapsed = 6;
 int sYear = 2017;
 
 //Target Time -- How much time has elapsed in light cycle
@@ -32,9 +32,10 @@ float targetTemp = 65; // 65 deg F morning 55 deg F night
 const int humidifier = 6; // digital pin humidifer is hooked up to
 
 //Hydroponics & Pump Digital Pins
-const int waterDepthSensor = A0;
-const int waterPump = 0;
-const int nutrientPump = 7;
+const int waterDepthSensor = A1;
+const int waterPump = 7;
+const int nutrient = 9;
+long prevNutrientMillis = 0;
 boolean onceToday = false;
 boolean onceToday1 = false;
 
@@ -67,7 +68,7 @@ void setup() {
   // Water and Nutrient Pump
   pinMode(waterDepthSensor, INPUT);
   pinMode(waterPump, OUTPUT);
-  pinMode(nutrientPump, OUTPUT);
+  pinMode(nutrient, OUTPUT);
 
 }
 
@@ -77,7 +78,7 @@ void loop() {
   lightControlLoop();
   hydroponicsLoop();
   humidityCheck();
-  nutrientCycle();
+  nutrientLoop();
 }
 
 void cerealloop() {
@@ -88,6 +89,7 @@ void cerealloop() {
       if (!once) {
         int read1 = Serial.parseInt();
         Serial.flush();
+        delay(2000);
         int read2 = Serial.parseInt();
         Serial.print("Date time: "); Serial.println(read1);
         Serial.print("Day Elapsed: "); Serial.println(read2);
@@ -107,16 +109,16 @@ void cerealloop() {
       Serial.print(getBoxHumidity());
       Serial.print(getWaterDepth());
       Serial.print(dayElapsed);
-      dayElapsed = Serial.parseInt();
     }
     Serial.flush();
-    delay(1000);
   }
 }
 
 void timeLoop() {
-  if (millis() % 8.64E7 == 0) {
+  if (millis() % (long)864E5 == 0) {
     dayElapsed++;
+    onceToday = false;
+    onceToday1 = false;
   }
 }
 
@@ -127,7 +129,7 @@ void tempControlLoop() {
     digitalWrite(coolerPin, LOW);    // default, cooler should be off
     digitalWrite(ceramicHeater, LOW);  // default heater should be off
   } else { //Will heat up to the targetTemp regardless of 5 deg threshold
-    if (tempValue < targetTemp) // min temp
+    if (tempValue < targetTemp-5) // min temp
     {
       digitalWrite(ceramicHeater, HIGH);   // turn on heater
     }
@@ -144,13 +146,15 @@ void lightControlLoop() {
   if (dayElapsed > 3) {
     if (currentMillis - previousMillis >= interval) {
       previousMillis = currentMillis;
-      if (interval == 7.2E7) {
+      if (interval >= 7.2E7) {
         interval = 1.44E7;  // light interval is 4 hours 1.44E7
         isOn = false;
+        targetTemp = targetTemp - 10;
         digitalWrite(growthLight, LOW);
       }
       else {
         interval = 7.2E7;
+        targetTemp = targetTemp+10;
         isOn = true;
         digitalWrite(growthLight, HIGH);
       }
@@ -160,19 +164,19 @@ void lightControlLoop() {
 
 void hydroponicsLoop() {
   int level = 2;
-  int waterDepth = getWaterDepth();
-  if (waterDepth >= level - 1) {
-    digitalWrite(waterPump, LOW);
-    digitalWrite(nutrientPump, LOW);
-  } else {
+  float waterDepth = getWaterDepth();
+    Serial.println(waterDepth);
+  if(waterDepth < 1.90){
     digitalWrite(waterPump, HIGH);
-    digitalWrite(nutrientPump, HIGH);
+  } else {
+    digitalWrite(waterPump, LOW);
   }
 }
 
 // Controls humidity of Farm. Author: Anya Li. Editted by: Stone Mao
 void humidityCheck() {
   int humidityValue = getBoxHumidity();
+
   if (humidityValue < 65.00) {
     digitalWrite(humidifier, HIGH);  // turn humidifier on if humidity is below 65%
   }
@@ -183,22 +187,25 @@ void humidityCheck() {
 }
 
 void nutrientLoop() {
-  long prevMillis = 0;
-  if (dayElapsed % 6 == 0 && !onceToday) {
-    if (!onceToday1) {
-      prevMillis = millis();
-      digitalWrite(nutrients, HIGH);
-      onceToday1 = true;
+  unsigned long currentMillis = millis(); //1000
+  if (dayElapsed % 6 == 0 && !onceToday) { // If day is factor of 6 and hasn't turned on today
+    if (!onceToday1) { // If prev mill hasn't turned on
+      prevNutrientMillis = millis(); //Store starting prevMillisecond
+      digitalWrite(nutrient, HIGH); // Turn pump on
+      onceToday1 = true; // Set it to true so it does this if statement once
+      //Serial.println("*");
     }
-    unsigned long currentMillis = millis();
-    if (currentMillis - prevMillis == 12000) {
-      digitalWrite(nutrients, LOW);
-      onceToday = true;
+    if (currentMillis - prevNutrientMillis >= 12000) { // If the difference is more than 12 sec
+      digitalWrite(nutrient, LOW); // Turn pump off
+      onceToday = true; // Once today is true
+    } else {
+      digitalWrite(nutrient, HIGH);
     }
-  } else {
-    onceToday = false;
-    onceToday1 = false;
+    //Serial.print("CurrentMillis: "); Serial.println(currentMillis);
+    //Serial.print("Prev: "); Serial.println(prevNutrientMillis);
+    //Serial.print("Difference: "); Serial.println(currentMillis - prevNutrientMillis);
   }
+  //Serial.print("Once Today: "); Serial.println(onceToday);
 }
 
 //Serial Connection handshake
