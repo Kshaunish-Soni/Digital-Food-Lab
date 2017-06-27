@@ -1,6 +1,7 @@
 import serial
 import tweepy
 import time
+import smtplib
 from datetime import datetime
 
 first_contact = False
@@ -43,6 +44,13 @@ def tweetThis(txt):
     # Yes, tweet is called 'status' rather confusing
     if __name__ == "__main__":
         main()
+
+def emailMsg(msg):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login("digitalfooddata@gmail.com", "digitalfooddata7")
+    server.sendmail("digitalfooddata@gmail.com", "digitalfooddata@gmail.com", msg)
+    server.quit()
 
 def getTimeDecimal():
     cur_time = datetime.now()
