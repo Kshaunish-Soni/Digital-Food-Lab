@@ -1,4 +1,5 @@
 import serial
+import tweepy
 import time
 from datetime import datetime
 
@@ -19,6 +20,30 @@ data_matrix = [[], #Time
                [], #Humidity
                [], #Water Depth
                ]
+
+#TWITTER STUFF
+def get_api(cfg):
+  auth = tweepy.OAuthHandler(cfg['consumer_key'], cfg['consumer_secret'])
+  auth.set_access_token(cfg['access_token'], cfg['access_token_secret'])
+  return tweepy.API(auth)
+
+def main():
+  # Fill in the values noted in previous step here
+  cfg = {
+    "consumer_key"        : "3D7nE3I2C2z5P4vzZfzLcYyPS",
+    "consumer_secret"     : "pSlGOEUElWliGS42i0UhSUAfgixUBamHZkXRB0L6zVwtxfgqQS",
+    "access_token"        : "879762965007814656-OEJ36590PYGYdcRV22pOMnDFcjOkWq1",
+    "access_token_secret" : "1TxsHiOt5GHaGp710xULkkJOog8arw0ZbncQAx6Fg002k"
+    }
+
+def tweetThis(txt):
+    api = get_api(cfg)
+    tweet = txt
+    status = api.update_status(status=tweet)
+    # Yes, tweet is called 'status' rather confusing
+    if __name__ == "__main__":
+        main()
+
 def getTimeDecimal():
     cur_time = datetime.now()
     return cur_time.month*1000000+cur_time.day*10000+cur_time.hour*100+cur_time.minute
@@ -57,6 +82,7 @@ finally:
             if data != "A" and data !="":
                 time.sleep(2)
                 go = True
+                tweetThis("I just rebooted! Keep Calm and Grow On!")
                 cereal_data.flushInput()
                 cereal_data.flushOutput()
                 cereal_data.flush()
@@ -77,7 +103,6 @@ finally:
                         text_file.write(",".join(str(e) for e in data_matrix[row+1])+"\n") #adds it into the textfile
 
                     day = num[len(num)-1]
-                    text_file.write(day) #Write the number of days
 
                     text_file.close()
                     
