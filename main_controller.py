@@ -13,7 +13,7 @@ cereal_data.stopbits=serial.STOPBITS_ONE
 cereal_data.xonxoff=False
 cereal_data.rtscts=False
 cereal_data.dsrdtr=False
-day = 3
+day = 7
 
 data_matrix = [[], #Time
                [], #Main Temp
@@ -28,7 +28,7 @@ def get_api(cfg):
   auth.set_access_token(cfg['access_token'], cfg['access_token_secret'])
   return tweepy.API(auth)
 
-def main():
+def main(txt):
   # Fill in the values noted in previous step here
   cfg = {
     "consumer_key"        : "3D7nE3I2C2z5P4vzZfzLcYyPS",
@@ -36,14 +36,11 @@ def main():
     "access_token"        : "879762965007814656-OEJ36590PYGYdcRV22pOMnDFcjOkWq1",
     "access_token_secret" : "1TxsHiOt5GHaGp710xULkkJOog8arw0ZbncQAx6Fg002k"
     }
-
-def tweetThis(txt):
-    api = get_api(cfg)
-    tweet = txt
-    status = api.update_status(status=tweet)
-    # Yes, tweet is called 'status' rather confusing
-    if __name__ == "__main__":
-        main()
+  api = get_api(cfg)
+  tweet = txt
+  status = api.update_status(status=tweet)
+  if __name__ == "__main__":
+    main()
 
 def emailMsg(msg):
     server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -83,14 +80,16 @@ finally:
         first_contact = True
         cur_time = getTimeDecimal()
         #writes time back to arduino
-        datadate = str(cur_time);
+        datadate = str(cur_time); #converts it to string
         while(not go):
             cereal_data.write(datadate+"\n"+str(day)+"\n") #Send the date time
             data = cereal_data.read()
             if data != "A" and data !="":
                 time.sleep(2)
                 go = True
-                tweetThis("I just rebooted! Keep Calm and Grow On!")
+                #main("I just rebooted! Keep Calm and Grow On!")
+                sm = "I just rebooted! Lettuce grow some more! This is day "+day
+                emailMsg(sm)
                 cereal_data.flushInput()
                 cereal_data.flushOutput()
                 cereal_data.flush()
@@ -98,7 +97,7 @@ finally:
         while 1:
             if go:
                 received_data = cereal_data.readline()
-
+                print(received_data)
                 if received_data != "A" and received_data != "":
                     num_array = [int(num) for num in received_data.split(".")] # Turns it into a string
                     text_file = open("Output.txt", "w") #Opens data file
@@ -117,4 +116,3 @@ finally:
                     print(data_matrix)
             
                 cereal_data.write(str(day)) # Will stimulate handshake
-        
