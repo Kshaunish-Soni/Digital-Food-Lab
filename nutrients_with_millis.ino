@@ -1,4 +1,4 @@
-int nutrients = 7; 
+int nutrients = #; // nutrient pump pin number
 unsigned long previousMillis = 0;
 boolean isOn = true;
 long interval = 12000; // nutrients pump on for 12 seconds
