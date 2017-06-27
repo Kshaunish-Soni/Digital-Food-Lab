@@ -4,7 +4,7 @@ import time
 import smtplib
 from datetime import datetime
 
-first_contact = False
+first_contact = False # First contact the arduino
 
 cereal_data = serial.Serial("/dev/ttyACM0",9600, timeout=1) #Connect to Arduino via USB on Serial 9600
 cereal_data.bytesize=serial.EIGHTBITS
@@ -13,6 +13,7 @@ cereal_data.stopbits=serial.STOPBITS_ONE
 cereal_data.xonxoff=False
 cereal_data.rtscts=False
 cereal_data.dsrdtr=False
+
 day = 7
 
 data_matrix = [[], #Time
@@ -42,6 +43,7 @@ def main(txt):
   if __name__ == "__main__":
     main()
 
+#EMAIL STUFF
 def emailMsg(msg):
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
@@ -49,20 +51,23 @@ def emailMsg(msg):
     server.sendmail("digitalfooddata@gmail.com", "digitalfooddata@gmail.com", msg)
     server.quit()
 
+#GET TIME
 def getTimeDecimal():
     cur_time = datetime.now()
     return cur_time.month*1000000+cur_time.day*10000+cur_time.hour*100+cur_time.minute
 
-try: #will try to add data to the output file
+
+#MAIN ---> WHAT IT WILL RUN
+try: #will try to open data from the output file
     row = 0
     text_file = open("Output.txt", "r")
 
-    for row in range(0,5):
+    for row in range(0,5): #FIVE ROWS
         text_split = text_file.readline().split(",")
         for num in text_split:
-            data_matrix[row].append(int(num))
+            data_matrix[row].append(int(num)) # RELOADS INTO DATA MATRIX
             
-    day = text_file.readline(6)
+    day = text_file.readline(6) # STORE DAYS
     
     print("Finish reading file")
     
@@ -73,12 +78,12 @@ except IOError:
 
 finally:
     serial_data_Array = []
-    go = False
-    inByte = cereal_data.read()
+    go = False # STARTS COMMUNICATING WITH THE ARDUINO
+    inByte = cereal_data.read() # Gets data from arduino
     if not first_contact : #If connection isn't estb, estb it
-        print(inByte);
+        print(inByte); # SHOULD BE "A"
         first_contact = True
-        cur_time = getTimeDecimal()
+        cur_time = getTimeDecimal() # Get current time
         #writes time back to arduino
         datadate = str(cur_time); #converts it to string
         while(not go):
@@ -94,12 +99,17 @@ finally:
                 cereal_data.flushOutput()
                 cereal_data.flush()
                 break
-        while 1:
+        while 1: # Infinite Loop
             if go:
                 received_data = cereal_data.readline()
                 print(received_data)
                 if received_data != "A" and received_data != "":
-                    num_array = [int(num) for num in received_data.split(".")] # Turns it into a string
+                    num_array = [0,0,0,0,0]
+                    try:
+                        num_array = [int(num) for num in received_data.split(".")] # Turns it into a string
+                    except: # Weird negative value exception
+                        print("Weird negative value")
+
                     text_file = open("Output.txt", "w") #Opens data file
 
                     data_matrix[0].append(getTimeDecimal())
