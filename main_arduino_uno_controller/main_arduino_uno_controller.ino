@@ -4,6 +4,14 @@
 #include <TimeLib.h>
 #include <Wire.h>
 
+boolean once = false;
+unsigned long pM = 0;
+//Start Time -- needed for the light system and harvesting
+int dayElapsed = 0;
+int sYear = 2017;
+
+//Target Time -- How much time has elapsed in light cycle
+int timeElapsed = 0;
 
 //Is it day or night
 boolean isDay = true;
@@ -35,6 +43,12 @@ int serialCount = 0;
 void setup() {
   Serial.begin(9600);
 
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  //Establish contact with Raspberry Pi
+  establishContact();
+
   // Light Setup
   pinMode(growthLight, OUTPUT);
   digitalWrite(growthLight, HIGH);
@@ -52,14 +66,49 @@ void setup() {
   pinMode(waterDepthSensor, INPUT);
   pinMode(waterPump, OUTPUT);
   pinMode(nutrientPump, OUTPUT);
-  
+
 }
 
 void loop() {
+  cerealloop();
   tempControlLoop();
   lightControlLoop();
   hydroponicsLoop();
   humidityCheck();
+}
+
+void cerealloop() {
+  unsigned long currentMillis = millis();
+  if (currentMillis - pM >= 1000 || !once) {
+    Serial.flush();
+    if (Serial.available() > 0) {
+      if (!once) {
+        int read1 = Serial.parseInt();
+        Serial.flush();
+        int read2 = Serial.parseInt();
+        Serial.print("Date time: "); Serial.println(read1);
+        Serial.print("Day Elapsed: "); Serial.println(read2);
+        int timeArray[4];
+        float myData = read1;
+        for (int i = 0; i < 4; i++) {
+          timeArray[3 - i] = ((int)myData) % 100;
+          myData /= 100;
+        }
+        dayElapsed = read2;
+        setTime(timeArray[2], timeArray[3], 0, timeArray[1], timeArray[0], sYear);
+        once = true;
+      }
+
+      Serial.print(getMainTemp());
+      Serial.print(getTemp2());
+      Serial.print(getBoxHumidity());
+      Serial.print(getWaterDepth());
+      Serial.print(dayElapsed);
+      dayElapsed = Serial.parseInt();
+    }
+    Serial.flush();
+    delay(1000);
+  }
 }
 
 void tempControlLoop() {
@@ -83,17 +132,19 @@ void tempControlLoop() {
 void lightControlLoop() {
   unsigned long currentMillis = millis();
   //LIGHT CONTROL
-  if (currentMillis - previousMillis >= interval){
-    previousMillis = currentMillis;
-    if (interval == 7.2E7) {
-      interval = 1.44E7;  // light interval is 4 hours 1.44E7
-      isOn = false;
-      digitalWrite(growthLight, LOW);
-    }
-    else {
-      interval = 7.2E7;
-      isOn = true;
-      digitalWrite(growthLight, HIGH);
+  if (dayElapsed > 3) {
+    if (currentMillis - previousMillis >= interval) {
+      previousMillis = currentMillis;
+      if (interval == 7.2E7) {
+        interval = 1.44E7;  // light interval is 4 hours 1.44E7
+        isOn = false;
+        digitalWrite(growthLight, LOW);
+      }
+      else {
+        interval = 7.2E7;
+        isOn = true;
+        digitalWrite(growthLight, HIGH);
+      }
     }
   }
 }
@@ -122,11 +173,19 @@ void humidityCheck() {
   }
 }
 
+//Serial Connection handshake
+void establishContact() {
+  while (Serial.available() <= 0) { // If not established
+    Serial.print("A"); // Will send A
+    delay(200);
+  }
+}
+
 //INSTANCE METHODS
 float getMainTemp() { // For main temperature sensorz
   int readData = DHT.read22(dataPin);
-  int faren = (DHT.temperature * 9/5 + 28.5);
-  Serial.print("Temp: "); Serial.println(faren);
+  int faren = (DHT.temperature * 9 / 5 + 28.5);
+  //Serial.print("Temp: "); Serial.println(faren);
   return faren;
 }
 
@@ -135,11 +194,11 @@ float getTemp2() {
 }
 
 float getBoxHumidity() {
-  Serial.print("Humidity: ");Serial.println(DHT.humidity);
+  //Serial.print("Humidity: ");Serial.println(DHT.humidity);
   return DHT.humidity;
 }
 
 float getWaterDepth() {
   int val = analogRead(waterDepthSensor);
-  return abs((val * 4.0) / 600);
+  return (val - 501) / 52.1;
 }

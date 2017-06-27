@@ -96,7 +96,7 @@ void loop() {
     Serial.print(getMainTemp());
     Serial.print(getTemp2());
     Serial.print(getBoxHumidity());
-    Serial.print(getWaterDepth());
+    Serial.print(round(abs(getWaterDepth())));
     Serial.print(dayElapsed);
     dayElapsed = Serial.parseInt();
   }
