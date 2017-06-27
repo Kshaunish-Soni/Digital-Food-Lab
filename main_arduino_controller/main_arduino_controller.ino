@@ -74,22 +74,22 @@ void loop() {
   Serial.flush();
   if (Serial.available() > 0) {
     if (!once) {
-        int read1 = Serial.parseInt();
-        Serial.flush();
-        int read2 = Serial.parseInt();
-        Serial.print("Date time: "); Serial.println(read1);
-        Serial.print("Day Elapsed: "); Serial.println(read2);
-        int timeArray[4];
-        float myData = read1;
-        for (int i = 0; i < 4; i++) {
-          timeArray[3 - i] = ((int)myData) % 100;
-          myData /= 100;
-        }
-        dayElapsed = read2;
-        setTime(timeArray[2], timeArray[3], 0, timeArray[1], timeArray[0], sYear);
-        once=true;
+      int read1 = Serial.parseInt();
+      Serial.flush();
+      int read2 = Serial.parseInt();
+      Serial.print("Date time: "); Serial.println(read1);
+      Serial.print("Day Elapsed: "); Serial.println(read2);
+      int timeArray[4];
+      float myData = read1;
+      for (int i = 0; i < 4; i++) {
+        timeArray[3 - i] = ((int)myData) % 100;
+        myData /= 100;
+      }
+      dayElapsed = read2;
+      setTime(timeArray[2], timeArray[3], 0, timeArray[1], timeArray[0], sYear);
+      once = true;
     }
-    
+
     Serial.print(getMainTemp());
     Serial.print(getTemp2());
     Serial.print(getBoxHumidity());
@@ -107,7 +107,7 @@ void lightCycle() {
      After seed germinates (around 6 days), lights will turn on and follow cycle
      WILL ADD SALENIS DATA ON
   */
-  Serial.print("Day: ");Serial.println(dayElapsed);
+  Serial.print("Day: "); Serial.println(dayElapsed);
   if (dayElapsed > 3) {
     digitalWrite(growthLight, HIGH);
     //Serial.println("Grow Light ON!");
@@ -203,5 +203,5 @@ float getBoxHumidity() {
 
 float getWaterDepth() {
   int val = analogRead(waterDepthSensor);
-  return abs((val*4.0)/600);
+  return abs((val * 4.0) / 600);
 }
