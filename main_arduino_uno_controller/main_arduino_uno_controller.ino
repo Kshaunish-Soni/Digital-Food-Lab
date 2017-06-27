@@ -35,6 +35,8 @@ const int humidifier = 6; // digital pin humidifer is hooked up to
 const int waterDepthSensor = A0;
 const int waterPump = 0;
 const int nutrientPump = 7;
+boolean onceToday = false;
+boolean onceToday1 = false;
 
 //Serial Data
 int serialCount = 0;
@@ -111,6 +113,12 @@ void cerealloop() {
   }
 }
 
+void timeLoop() {
+  if (millis() % 8.64E7 == 0) {
+    dayElapsed++;
+  }
+}
+
 void tempControlLoop() {
   int tempValue = getMainTemp();
   //Cooler and Heater are Digital (On or Off)
@@ -170,6 +178,25 @@ void humidityCheck() {
   else if (humidityValue >= 67.00)
   {
     digitalWrite(humidifier, LOW);  // turn humidifier off if humidity is greater or equal to 67%
+  }
+}
+
+void nutrientLoop() {
+  long prevMillis = 0;
+  if (dayElapsed % 6 == 0 && !onceToday) {
+    if (!onceToday1) {
+      prevMillis = millis();
+      digitalWrite(nutrients, HIGH);
+      onceToday1 = true;
+    }
+    unsigned long currentMillis = millis();
+    if (currentMillis - prevMillis == 12000) {
+      digitalWrite(nutrients, LOW);
+      onceToday = true;
+    }
+  } else {
+    onceToday = false;
+    onceToday1 = false;
   }
 }
 
