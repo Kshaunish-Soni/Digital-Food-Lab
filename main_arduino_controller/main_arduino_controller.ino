@@ -183,8 +183,8 @@ void hydroponicsLoop() {
   delay(2000);
 }
 
+// Controls nutrients in water. Based on our recipe Author: Anya Li
 void nutrientLoop() {
-  // put your main code here, to run repeatedly:
   digitalWrite(nutrients, HIGH);
   delay(12000); // pump nutrients for 12 seconds
   digitalWrite(nutrients, LOW);
