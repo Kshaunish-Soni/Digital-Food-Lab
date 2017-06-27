@@ -77,6 +77,7 @@ void loop() {
   lightControlLoop();
   hydroponicsLoop();
   humidityCheck();
+  nutrientCycle();
 }
 
 void cerealloop() {
