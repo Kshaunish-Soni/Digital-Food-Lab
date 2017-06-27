@@ -1,0 +1,6 @@
+You can use Arduino due or arduino mega. If using Arduino Mega, DEFINETELY USE RAMPS 1.4 SHEILD IT MAKES THE WIRING 10 TIMES SIMPLER. 
+If using arduino due, get 4 A4988 motor drivers and connect them to breadboards. 1 should be enough but 2 can still be used. 
+use this guide to (http://howtomechatronics.com/tutorials/arduino/how-to-control-stepper-motor-with-a4988-driver-and-arduino/) 
+to connect the wires in the right place. WATCH THE VIDEO. 
+
+Repeat the circuit diagram 4 times, and connect the two wires (yellow and blue in the diagram) into whichever pins make the wiring simpler. 
