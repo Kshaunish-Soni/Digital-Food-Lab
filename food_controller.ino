@@ -37,7 +37,9 @@ const int ultraEcho = 10;
 const int analogInPin = A1;
 float sensorValue = 0;
 
-const int waterPump = 7;
+const int waterOut = 0;
+const int phUp = 1;
+const int phDown = 2;
 const int nutrient = 9;
 long prevNutrientMillis = 0;
 boolean onceToday = false;
@@ -72,20 +74,47 @@ void setup() {
   // Water and Nutrient Pump
   pinMode(ultraTrig, OUTPUT);
   pinMode(ultraEcho, INPUT);
-  pinMode(waterPump, OUTPUT);
+  pinMode(waterOut, OUTPUT);
   pinMode(nutrient, OUTPUT);
   pinMode(analogInPin, INPUT);
-
+  pinMode(waterOut, OUTPUT);
+  pinMode(phUp, OUTPUT);
+  pinMode(phDown, OUTPUT);
+  digitalWrite(waterOut, HIGH);
+  digitalWrite(phUp, LOW);
+  digitalWrite(phDown, LOW);
 }
 
 void loop() {
+
   cerealloop();
   tempControlLoop();
   lightControlLoop();
-  //getWaterDepthNew();
-  hydroponicsLoop();
+//  hydroponicsLoop();
   humidityCheck();
   nutrientLoop();
+//HYDROPONICS LOOP
+  float value = analogRead(A1);
+
+  if(value < 100){
+    digitalWrite(waterOut, HIGH);
+  } 
+  else {
+       digitalWrite(waterOut, LOW);
+  }
+  
+  //PRINT STUFF
+  Serial.print(getMainTemp());
+    Serial.print("\t");
+  Serial.print(getTemp2());
+    Serial.print("\t");
+  Serial.print(getBoxHumidity());
+    Serial.print("\t");
+  Serial.print(value);
+  Serial.print("\t");
+  Serial.println(dayElapsed);
+  //Serial.print(hours());
+
 }
 
 void cerealloop() {
@@ -113,15 +142,6 @@ void cerealloop() {
         setTime(timeArray[2], timeArray[3], 0, timeArray[1], timeArray[0], sYear);
         once = true;
       }
-
-  
-      Serial.print(getMainTemp());
-      Serial.print(getTemp2());
-      Serial.print(getBoxHumidity());
-      Serial.print(getWaterDepthNew());
-      Serial.print(".");
-      Serial.println(dayElapsed);
-      //Serial.print(hours());
     }
     Serial.flush();
   }
@@ -177,12 +197,12 @@ void lightControlLoop() {
 
 //void hydroponicsLoop() {
 //  int level = 2;
-//  int waterDepth = getWaterDepthNew();
-//    //Serial.println(waterDepth);
+//  int waterDepth = analogRead(A1);
+//  Serial.println(waterDepth);
 //  if(waterDepth < 600){
-//    digitalWrite(waterPump, HIGH);
+//    digitalWrite(waterOut, HIGH);
 //  } else {
-//       digitalWrite(waterPump, LOW);
+//       digitalWrite(waterOut, LOW);
 //  }
 //}
 
@@ -230,7 +250,7 @@ void nutrientLoop() {
       onceToday1 = true; // Set it to true so it does this if statement once
       //Serial.println("*");
     }
-    if (currentMillis - prevNutrientMillis >= 12000) { // If the difference is more than 12 sec
+    if (currentMillis - prevNutrientMillis >= 13700) { // If the difference is more than 12 sec
       digitalWrite(nutrient, LOW); // Turn pump off
       onceToday = true; // Once today is true
     } else {
@@ -270,7 +290,6 @@ float getBoxHumidity() {
 
 float getWaterDepthNew() {
   sensorValue = analogRead(analogInPin);
-  Serial.print(sensorValue);
   return sensorValue;
 }
 //float getWaterDepth() {
